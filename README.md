@@ -1,70 +1,159 @@
-# Getting Started with Create React App
+# 🎬 CineMood — Mood-Based Movie Recommendation System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> Type how you feel. Get the perfect film for this moment.
 
-## Available Scripts
+CineMood is a full-stack web application that uses **Natural Language Processing** to analyze a user's mood from free-text input and recommends movies using real-time data from the TMDB API. Users can also search movies directly, rate films, and explore similar titles — all in a Netflix-inspired dark UI.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## ✨ Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Mood Analysis** — NLP sentiment analysis (TextBlob + NLTK) detects emotion and polarity from natural text input
+- **Mood-to-Genre Mapping** — Maps detected emotions (happy, sad, fearful, romantic, etc.) to TMDB genre IDs
+- **Smart Ranking** — Scores and ranks movies using a weighted formula: TMDB rating + overview sentiment alignment + user rating personalization
+- **Direct Search** — Search any movie by title for browsing or rating
+- **Movie Detail Modal** — Click any film to see full overview, ratings, and sentiment score
+- **"More Like This"** — Fetches similar movies via TMDB's recommendation engine
+- **5-Star Rating System** — Rate films to personalize future recommendations
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🛠 Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| Layer | Technology |
+|-------|------------|
+| Frontend | React, CSS3 (custom Netflix-dark theme) |
+| Backend | Python, Flask, Flask-CORS |
+| NLP / ML | NLTK, TextBlob (sentiment analysis) |
+| Data | TMDB API (live movie data, posters, similar films) |
+| Fonts | Bebas Neue, DM Sans (Google Fonts) |
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🧠 How the NLP Pipeline Works
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```
+User Input: "I feel lonely and a little sad tonight"
+        ↓
+TextBlob Sentiment Analysis
+  polarity: -0.3  →  "negative"
+  subjectivity: 0.6
+        ↓
+Keyword Emotion Detection
+  "lonely", "sad"  →  emotion: "sad"
+        ↓
+Mood-to-Genre Mapping
+  sad  →  [Drama (18), Romance (10749), History (36)]
+        ↓
+TMDB API: /discover/movie?with_genres=18,10749,36
+        ↓
+Ranking Formula
+  score = (tmdb_rating × 0.5)
+        + (overview_sentiment_bonus)
+        + (user_rating_personalization)
+        ↓
+Top 20 Ranked Recommendations
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 🚀 Getting Started
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Prerequisites
+- Python 3.8+
+- Node.js 16+
+- Free [TMDB API Key](https://www.themoviedb.org/settings/api)
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Backend Setup
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+cd backend
+pip install -r requirements.txt
+python -c "import nltk; nltk.download('punkt')"
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Open `recommender.py` and add your TMDB API key:
+```python
+def get_api_key():
+    return "your_tmdb_api_key_here"
+```
 
-## Learn More
+Start the Flask server:
+```bash
+python app.py
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Server runs at `http://localhost:5000`
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Frontend Setup
 
-### Code Splitting
+```bash
+cd frontend
+npm install
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+App runs at `http://localhost:3000`
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 📁 Project Structure
 
-### Making a Progressive Web App
+```
+cinemood/
+├── backend/
+│   ├── app.py            # Flask REST API (5 routes)
+│   ├── sentiment.py      # NLP mood analysis pipeline
+│   ├── recommender.py    # TMDB integration + ranking logic
+│   └── requirements.txt
+└── frontend/
+    └── src/
+        ├── App.jsx               # Root component + state
+        ├── App.css               # Netflix-dark theme
+        └── components/
+            ├── MoodInput.jsx     # Mood text input + quick chips
+            ├── SearchInput.jsx   # Direct movie title search
+            ├── MovieGrid.jsx     # Responsive poster grid
+            ├── MovieModal.jsx    # Detail modal + similar films
+            ├── StarRating.jsx    # Interactive 5-star rating
+            └── RatedMovies.jsx   # Personal ratings list
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+---
 
-### Advanced Configuration
+## 🔌 API Endpoints
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/recommend` | Analyze mood text → return ranked movies |
+| POST | `/api/search` | Search movies by title via TMDB |
+| GET | `/api/similar/:id` | Fetch similar movies for a given movie ID |
+| POST | `/api/rate` | Save a user rating for a movie |
+| GET | `/api/ratings` | Retrieve all stored user ratings |
+| GET | `/api/health` | Health check |
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 📸 Screenshots
 
-### `npm run build` fails to minify
+> Add screenshots here after deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
+
+## 🔮 Future Improvements
+
+- [ ] Persistent ratings with a database (MongoDB / PostgreSQL)
+- [ ] User authentication
+- [ ] Watchlist feature
+- [ ] Deploy frontend to Vercel + backend to Render
+- [ ] Improve NLP with a fine-tuned transformer model (HuggingFace)
+
+---
+
+## 📄 License
+
+MIT License — feel free to fork and build on this.
+
+---
+
+*Built with React, Flask, and TextBlob. Movie data provided by [TMDB](https://www.themoviedb.org/).*
